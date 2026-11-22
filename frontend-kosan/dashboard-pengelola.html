@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pengelola - KasKos</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Sidebar Menu Pengelola -->
+    <div class="sidebar">
+        <h2>KasKos.</h2>
+        <div class="menu-item active" data-target="page-dashboard">🏠 Dashboard Utama</div>
+        <div class="menu-item" data-target="page-kamar">🛏️ Manajemen Kamar</div>
+        <div class="menu-item" data-target="page-penghuni">👥 Data Penghuni</div>
+        <div class="menu-item" data-target="page-tagihan">📋 Manajemen Tagihan</div>
+        <div class="menu-item" data-target="page-verifikasi">🔍 Verifikasi Pembayaran</div>
+        <div class="menu-item" data-target="page-kas">💰 Laporan Arus Kas</div>
+        <div class="menu-item" data-target="page-ai">🤖 Asisten Virtual AI</div>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h3 id="welcomeMessage">Halo, Pengelola</h3>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">Sistem Informasi Pengelolaan Kas dan Tagihan Kos</p>
+            </div>
+            <button class="btn-outline" onclick="logout()">Keluar Akun</button>
+        </div>
+        
+        <!-- 1. Halaman Dashboard Utama -->
+        <div id="page-dashboard" class="page-section active glass-panel">
+            <h3 style="color: var(--accent); margin-bottom: 20px;">Ringkasan Sistem Kos</h3>
+            <div class="grid-cards">
+                <div class="stat-card">
+                    <h4>Saldo Kas Kos</h4>
+                    <h2 id="dash-saldo" style="color: var(--accent);">Rp 0</h2>
+                </div>
+                <div class="stat-card">
+                    <h4>Pemasukan Kas</h4>
+                    <h2 id="dash-pemasukan" style="color: var(--status-lunas);">Rp 0</h2>
+                </div>
+                <div class="stat-card">
+                    <h4>Pengeluaran Kas</h4>
+                    <h2 id="dash-pengeluaran" style="color: var(--status-ditolak);">Rp 0</h2>
+                </div>
+                <div class="stat-card">
+                    <h4>Penghuni Menunggak</h4>
+                    <h2 id="dash-penunggak" style="color: var(--status-menunggu);">0 Orang</h2>
+                </div>
+                <div class="stat-card">
+                    <h4>Kamar Terisi / Total</h4>
+                    <h2 id="dash-kamar-stat">0 / 0</h2>
+                </div>
+                <div class="stat-card">
+                    <h4>Total Penghuni Aktif</h4>
+                    <h2 id="dash-penghuni-stat">0</h2>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px;">
+                <h4 style="color: var(--text-primary); margin-bottom: 12px;">Tagihan Bulan Berjalan</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Penghuni</th>
+                                <th>Kamar</th>
+                                <th>Periode</th>
+                                <th>Total Tagihan</th>
+                                <th>Jatuh Tempo</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-dash-tagihan">
+                            <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Halaman Manajemen Kamar -->
+        <div id="page-kamar" class="page-section glass-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="color: var(--accent);">Manajemen Kamar</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Kelola nomor kamar, status ketersediaan, dan tarif sewa bulanan.</p>
+                </div>
+                <button class="btn-primary" onclick="toggleForm('form-kamar', 'tabel-kamar-container')">+ Tambah Kamar Baru</button>
+            </div>
+            
+            <div id="tabel-kamar-container" class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No Kamar</th>
+                            <th>Tarif Bulanan</th>
+                            <th>Status Kamar</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-kamar"></tbody>
+                </table>
+            </div>
+
+            <div id="form-kamar" style="display: none; max-width: 500px; margin-top: 16px;">
+                <h4 style="color: var(--accent); margin-bottom: 16px;">Form Tambah Kamar</h4>
+                <form id="kamarForm">
+                    <div class="form-group">
+                        <label>Nomor Kamar</label>
+                        <input type="text" id="nomor_kamar" placeholder="Contoh: 101, A1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tarif Bulanan (Rp)</label>
+                        <input type="number" id="tarif_bulanan" placeholder="Contoh: 850000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status Awal</label>
+                        <select id="status_kamar" required>
+                            <option value="Tersedia">Tersedia</option>
+                            <option value="Terisi">Terisi</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn-primary">Simpan Kamar</button>
+                        <button type="button" class="btn-outline" onclick="toggleForm('tabel-kamar-container', 'form-kamar')">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. Halaman Data Penghuni -->
+        <div id="page-penghuni" class="page-section glass-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="color: var(--accent);">Data Penghuni Kos</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Kelola informasi penghuni dan penempatan kamar.</p>
+                </div>
+                <button class="btn-primary" onclick="toggleForm('form-penghuni', 'tabel-penghuni-container')">+ Daftarkan Penghuni</button>
+            </div>
+
+            <div id="tabel-penghuni-container" class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Lengkap</th>
+                            <th>Email</th>
+                            <th>No Telepon</th>
+                            <th>Kamar</th>
+                            <th>Tgl Masuk</th>
+                            <th>Status Aktif</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-penghuni"></tbody>
+                </table>
+            </div>
+
+            <div id="form-penghuni" style="display: none; max-width: 550px; margin-top: 16px;">
+                <h4 style="color: var(--accent); margin-bottom: 16px;">Pendaftaran Akun Penghuni Baru</h4>
+                <form id="penghuniForm">
+                    <div class="form-group">
+                        <label>Nama Lengkap Penghuni</label>
+                        <input type="text" id="p_nama" placeholder="Nama penghuni" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Penghuni (untuk login)</label>
+                        <input type="email" id="p_email" placeholder="nama@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password Akun</label>
+                        <input type="password" id="p_password" placeholder="Password minimal 6 karakter" required>
+                    </div>
+                    <div class="form-group">
+                        <label>No Telepon / WhatsApp</label>
+                        <input type="text" id="p_telepon" placeholder="08xxxxxxxxxx" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pilih Kamar yang Ditempati</label>
+                        <select id="p_kamar" required>
+                            <option value="">-- Pilih Kamar Tersedia --</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn-primary">Daftarkan Penghuni</button>
+                        <button type="button" class="btn-outline" onclick="toggleForm('tabel-penghuni-container', 'form-penghuni')">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. Halaman Manajemen Tagihan -->
+        <div id="page-tagihan" class="page-section glass-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="color: var(--accent);">Manajemen Tagihan Bulanan</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Buat tagihan baru untuk penghuni dan pantau status pembayarannya.</p>
+                </div>
+                <button class="btn-primary" onclick="toggleForm('form-buat-tagihan', 'tabel-tagihan-container')">+ Buat Tagihan Baru</button>
+            </div>
+
+            <div id="form-buat-tagihan" style="display: none; max-width: 600px; margin-bottom: 24px; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-stroke);">
+                <h4 style="color: var(--accent); margin-bottom: 16px;">Form Penerbitan Tagihan Bulanan</h4>
+                <form id="tagihanForm">
+                    <div class="form-group">
+                        <label>Pilih Penghuni</label>
+                        <select id="t_penghuni" required onchange="onPenghuniTagihanSelected()">
+                            <option value="">-- Pilih Penghuni --</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Bulan Tagihan (1 - 12)</label>
+                            <select id="t_bulan" required>
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Maret</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Juni</option>
+                                <option value="7">Juli</option>
+                                <option value="8">Agustus</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tahun Tagihan</label>
+                            <input type="number" id="t_tahun" value="2026" required>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Nominal Dasar (Sewa Kamar Rp)</label>
+                            <input type="number" id="t_nominal_dasar" placeholder="850000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nominal Denda (Rp jika ada)</label>
+                            <input type="number" id="t_nominal_denda" value="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Batas Jatuh Tempo</label>
+                        <input type="date" id="t_jatuh_tempo" required>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn-primary">Terbitkan Tagihan</button>
+                        <button type="button" class="btn-outline" onclick="toggleForm('tabel-tagihan-container', 'form-buat-tagihan')">Batal</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="tabel-tagihan-container" class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Periode</th>
+                            <th>Penghuni</th>
+                            <th>Kamar</th>
+                            <th>Nominal Dasar</th>
+                            <th>Denda</th>
+                            <th>Total Tagihan</th>
+                            <th>Jatuh Tempo</th>
+                            <th>Status Tagihan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-tagihan"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 5. Halaman Verifikasi Pembayaran (OCR & Manual) -->
+        <div id="page-verifikasi" class="page-section glass-panel">
+            <h3 style="color: var(--accent); margin-bottom: 8px;">Verifikasi Pembayaran OCR & Manual</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 13px;">
+                Sistem secara otomatis membaca bukti transfer dengan OCR AI. Bukti yang meragukan memerlukan persetujuan manual pengelola.
+            </p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tgl Upload</th>
+                            <th>Penghuni</th>
+                            <th>Kamar</th>
+                            <th>Periode</th>
+                            <th>Total Tagihan</th>
+                            <th>OCR Terbaca</th>
+                            <th>Status Verifikasi</th>
+                            <th>Bukti Transfer</th>
+                            <th>Aksi Pengelola</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-verifikasi"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 6. Halaman Laporan Arus Kas -->
+        <div id="page-kas" class="page-section glass-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="color: var(--accent);">Laporan Arus Kas</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Pencatatan pemasukan sewa kos dan pengeluaran operasional.</p>
+                </div>
+                <button class="btn-primary" onclick="toggleForm('form-kas', 'tabel-kas-container')">+ Catat Transaksi Baru</button>
+            </div>
+
+            <!-- Ringkasan Kas -->
+            <div class="grid-cards" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <h4>Total Pemasukan</h4>
+                    <h2 id="kas-pemasukan" style="color: var(--status-lunas);">Rp 0</h2>
+                </div>
+                <div class="stat-card">
+                    <h4>Total Pengeluaran</h4>
+                    <h2 id="kas-pengeluaran" style="color: var(--status-ditolak);">Rp 0</h2>
+                </div>
+                <div class="stat-card">
+                    <h4>Saldo Akhir Kas</h4>
+                    <h2 id="kas-saldo" style="color: var(--accent);">Rp 0</h2>
+                </div>
+            </div>
+
+            <div id="form-kas" style="display: none; max-width: 550px; margin-bottom: 24px; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-stroke);">
+                <h4 style="color: var(--accent); margin-bottom: 16px;">Catat Arus Kas Baru</h4>
+                <form id="kasForm">
+                    <div class="form-group">
+                        <label>Jenis Transaksi</label>
+                        <select id="k_jenis" required>
+                            <option value="pemasukan">Pemasukan (+)</option>
+                            <option value="pengeluaran">Pengeluaran (-)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nominal (Rp)</label>
+                        <input type="number" id="k_nominal" placeholder="Contoh: 150000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Transaksi</label>
+                        <input type="date" id="k_tanggal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Keterangan Transaksi</label>
+                        <input type="text" id="k_keterangan" placeholder="Contoh: Pembelian token listrik kos, Biaya kebersihan" required>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn-primary">Simpan Transaksi</button>
+                        <button type="button" class="btn-outline" onclick="toggleForm('tabel-kas-container', 'form-kas')">Batal</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="tabel-kas-container" class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Keterangan</th>
+                            <th>Jenis</th>
+                            <th>Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-kas"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 7. Halaman Asisten Virtual AI (8 Opsi Termasuk Khusus Pengelola) -->
+        <div id="page-ai" class="page-section glass-panel">
+            <h3 style="color: var(--accent); margin-bottom: 8px;">🤖 Asisten Virtual AI Pengelola Kos</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">
+                Pilih salah satu dari 8 opsi pertanyaan terstruktur di bawah ini. Layanan AI Gemini akan menyajikan data real-time kos Anda dalam bahasa natural yang ringkas dan jelas:
+            </p>
+
+            <div class="ai-container">
+                <div class="ai-options">
+                    <button class="ai-opt-btn" onclick="tanyaAI(1)">
+                        <span>1. Cek tagihan bulan ini dan bulan depan</span>
+                        <span>👉</span>
+                    </button>
+                    <button class="ai-opt-btn" onclick="tanyaAI(2)">
+                        <span>2. Cek tanggal jatuh tempo</span>
+                        <span>👉</span>
+                    </button>
+                    <button class="ai-opt-btn" onclick="tanyaAI(3)">
+                        <span>3. Cek status pembayaran</span>
+                        <span>👉</span>
+                    </button>
+                    <button class="ai-opt-btn" onclick="tanyaAI(4)">
+                        <span>4. Riwayat pembayaran</span>
+                        <span>👉</span>
+                    </button>
+                    <button class="ai-opt-btn" onclick="tanyaAI(5)">
+                        <span>5. Cara upload bukti transfer</span>
+                        <span>👉</span>
+                    </button>
+                    <button class="ai-opt-btn" onclick="tanyaAI(6)" style="border-color: rgba(127, 214, 195, 0.4);">
+                        <span><strong>6. Rangkuman kas bulanan</strong> ✨</span>
+                        <span>👉</span>
+                    </button>
+                    <button class="ai-opt-btn" onclick="tanyaAI(7)" style="border-color: rgba(251, 191, 36, 0.4);">
+                        <span><strong>7. Daftar penghuni yang menunggak</strong> ⚠️</span>
+                        <span>👉</span>
+                    </button>
+                    <button class="ai-opt-btn" onclick="tanyaAI(8)">
+                        <span>8. Cara menggunakan fitur aplikasi lainnya</span>
+                        <span>👉</span>
+                    </button>
+                </div>
+
+                <div class="ai-chat-box">
+                    <div class="ai-chat-header">
+                        <span>💬 Jawaban Asisten AI:</span>
+                        <span id="ai-loading-indicator" style="display:none; font-size: 12px; color: var(--accent);">Sedang menyusun data...</span>
+                    </div>
+                    <div id="ai-response-box" class="ai-chat-body">
+                        Silakan pilih salah satu opsi di sebelah kiri untuk melihat informasi terpusat kas dan penghuni kos Anda.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Pratinjau Bukti Transfer -->
+    <div id="modalBukti" class="modal-overlay" onclick="closeModalBukti()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h4 style="color: var(--accent);">Pratinjau Foto Bukti Transfer</h4>
+                <button class="btn-outline" onclick="closeModalBukti()" style="padding: 4px 10px;">✕ Tutup</button>
+            </div>
+            <img id="modalBuktiImg" src="" alt="Bukti Transfer" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

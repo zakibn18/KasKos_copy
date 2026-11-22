@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - KosAdmin.</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* CSS tambahan khusus untuk memosisikan kotak login di tengah */
+        body {
+            justify-content: center;
+            align-items: center;
+        }
+        .auth-wrapper {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        .alert { display: none; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
+        .alert.error { background: rgba(248, 113, 113, 0.15); color: var(--status-ditolak); border: 1px solid var(--status-ditolak); display: block; }
+        .alert.success { background: rgba(74, 222, 128, 0.15); color: var(--status-lunas); border: 1px solid var(--status-lunas); display: block; }
+    </style>
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="glass-panel">
+            <h2 style="color: var(--accent); margin-bottom: 8px; text-align: center;">KosAdmin.</h2>
+            <p style="color: var(--text-secondary); text-align: center; font-size: 14px; margin-bottom: 24px;">Silakan masuk ke akun Anda</p>
+            
+            <div id="alertBox" class="alert"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="nama@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">Masuk Akun</button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                Akun penghuni didaftarkan langsung oleh Pengelola Kos.<br>
+                Silakan hubungi pengelola jika Anda belum memiliki akses.
+            </div>
+        </div>
+    </div>
+
+    <!-- Script JS yang lama tetap bisa digunakan -->
+    <script src="js/auth.js"></script>
+</body>
+</html>
