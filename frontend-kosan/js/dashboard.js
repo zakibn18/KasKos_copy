@@ -1,7 +1,7 @@
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000/api'
-  : 'https://NAMA-PROJECT-BACKEND-KAMU.vercel.app/api';
-  
+  : 'https://kas-kos-copy.vercel.app/api';
+
 let token = localStorage.getItem('token');
 let currentUser = null;
 let penghuniListCache = [];
