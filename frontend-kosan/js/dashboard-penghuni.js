@@ -5,6 +5,7 @@ const API_URL = window.location.hostname === 'localhost' || window.location.host
 let token = localStorage.getItem('token');
 let currentUser = null;
 let tagihanDataList = [];
+let penghuniProfilCache = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthPenghuni();
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProfil();
     setupImagePreview();
     setupUploadForm();
+    setupEditProfilListener();
 });
 
 // 1. Verifikasi Autentikasi Penghuni
@@ -401,6 +403,7 @@ async function loadProfil() {
         if (res.ok) {
             const json = await res.json();
             const p = json.data;
+            penghuniProfilCache = p;
             if (p) {
                 document.getElementById('prof-nama').textContent = p.users?.nama_lengkap || currentUser.nama_lengkap;
                 document.getElementById('prof-email').textContent = p.users?.email || currentUser.email;
@@ -414,6 +417,67 @@ async function loadProfil() {
     } catch (e) {
         console.warn('Gagal memuat profil penghuni:', e);
     }
+}
+
+function openEditProfilModal() {
+    if (!penghuniProfilCache) return;
+    document.getElementById('edit_prof_nama').value = penghuniProfilCache.users?.nama_lengkap || currentUser.nama_lengkap || '';
+    document.getElementById('edit_prof_telepon').value = penghuniProfilCache.users?.no_telepon || '';
+    document.getElementById('edit_prof_password').value = '';
+    document.getElementById('modalEditProfil').classList.add('active');
+}
+
+function closeEditProfilModal() {
+    document.getElementById('modalEditProfil').classList.remove('active');
+}
+
+function setupEditProfilListener() {
+    const form = document.getElementById('editProfilForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nama = document.getElementById('edit_prof_nama').value.trim();
+        const telepon = document.getElementById('edit_prof_telepon').value.trim();
+        const password = document.getElementById('edit_prof_password').value;
+
+        const payload = {
+            nama_lengkap: nama,
+            no_telepon: telepon
+        };
+        if (password && password.trim() !== '') {
+            payload.password = password;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/penghuni/me`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (res.ok) {
+                notify('Profil berhasil diperbarui!');
+                closeEditProfilModal();
+
+                // Perbarui localStorage userKos
+                if (currentUser) {
+                    currentUser.nama_lengkap = nama;
+                    localStorage.setItem('userKos', JSON.stringify(currentUser));
+                    document.getElementById('welcomeMessage').textContent = `Halo, ${nama}`;
+                }
+
+                loadProfil();
+            } else {
+                notify(result.message || 'Gagal memperbarui profil.');
+            }
+        } catch (err) {
+            notify('Terjadi kesalahan saat memperbarui profil.');
+        }
+    });
 }
 
 // Utilitas Helper

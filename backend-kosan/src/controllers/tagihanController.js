@@ -118,3 +118,56 @@ exports.getTagihan = async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+// Pengelola: Edit Tagihan
+exports.updateTagihan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      bulan_tagihan,
+      tahun_tagihan,
+      nominal_dasar,
+      nominal_denda,
+      tanggal_jatuh_tempo,
+      status_tagihan
+    } = req.body;
+
+    const denda = Number(nominal_denda || 0);
+    const nominal = Number(nominal_dasar);
+    const total_tagihan = nominal + denda;
+
+    const updateData = {
+      total_tagihan
+    };
+    if (bulan_tagihan !== undefined) updateData.bulan_tagihan = Number(bulan_tagihan);
+    if (tahun_tagihan !== undefined) updateData.tahun_tagihan = Number(tahun_tagihan);
+    if (nominal_dasar !== undefined) updateData.nominal_dasar = nominal;
+    if (nominal_denda !== undefined) updateData.nominal_denda = denda;
+    if (tanggal_jatuh_tempo !== undefined) updateData.tanggal_jatuh_tempo = tanggal_jatuh_tempo;
+    if (status_tagihan !== undefined) updateData.status_tagihan = status_tagihan;
+
+    const { data, error } = await supabase
+      .from('tagihan')
+      .update(updateData)
+      .eq('id', id)
+      .select('*, penghuni(*, users(*), kamar(*))')
+      .single();
+
+    if (error) return res.status(500).json({ status: 'error', message: error.message });
+    res.status(200).json({ status: 'success', message: 'Tagihan berhasil diperbarui!', data });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
+// Pengelola: Hapus Tagihan
+exports.deleteTagihan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabase.from('tagihan').delete().eq('id', id);
+    if (error) return res.status(500).json({ status: 'error', message: error.message });
+    res.status(200).json({ status: 'success', message: 'Tagihan berhasil dihapus!' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};

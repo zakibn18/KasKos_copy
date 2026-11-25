@@ -273,6 +273,7 @@
                             <th>Total Tagihan</th>
                             <th>Jatuh Tempo</th>
                             <th>Status Tagihan</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-tagihan"></tbody>
@@ -370,6 +371,7 @@
                             <th>Keterangan</th>
                             <th>Jenis</th>
                             <th>Nominal</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-kas"></tbody>
@@ -442,6 +444,181 @@
                 <button type="button" id="modalBuktiClose" class="btn-outline btn-sm" onclick="closeModalBukti()"><i data-icon="x"></i>Tutup</button>
             </div>
             <img id="modalBuktiImg" src="" alt="Bukti transfer">
+        </div>
+    </div>
+
+    <!-- Modal Edit Kamar -->
+    <div id="modalEditKamar" class="modal-overlay" onclick="closeEditKamarModal()">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalEditKamarTitle" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <h4 id="modalEditKamarTitle">Edit Data Kamar</h4>
+                <button type="button" class="btn-outline btn-sm" onclick="closeEditKamarModal()"><i data-icon="x"></i>Tutup</button>
+            </div>
+            <form id="editKamarForm">
+                <input type="hidden" id="edit_kamar_id">
+                <div class="form-group">
+                    <label for="edit_nomor_kamar">Nomor Kamar</label>
+                    <input type="text" id="edit_nomor_kamar" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_tarif_bulanan">Tarif Bulanan (Rp)</label>
+                    <input type="number" id="edit_tarif_bulanan" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_status_kamar">Status Kamar</label>
+                    <select id="edit_status_kamar" required>
+                        <option value="Tersedia">Tersedia</option>
+                        <option value="Terisi">Terisi</option>
+                    </select>
+                </div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                    <button type="button" class="btn-outline" onclick="closeEditKamarModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Penghuni -->
+    <div id="modalEditPenghuni" class="modal-overlay" onclick="closeEditPenghuniModal()">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalEditPenghuniTitle" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <h4 id="modalEditPenghuniTitle">Edit Data Penghuni</h4>
+                <button type="button" class="btn-outline btn-sm" onclick="closeEditPenghuniModal()"><i data-icon="x"></i>Tutup</button>
+            </div>
+            <form id="editPenghuniForm">
+                <input type="hidden" id="edit_penghuni_id">
+                <div class="form-group">
+                    <label for="edit_p_nama">Nama Lengkap</label>
+                    <input type="text" id="edit_p_nama" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_p_telepon">No Telepon / WhatsApp</label>
+                    <input type="text" id="edit_p_telepon" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_p_kamar">Pilih Kamar</label>
+                    <select id="edit_p_kamar" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_p_tgl_masuk">Tanggal Masuk</label>
+                    <input type="date" id="edit_p_tgl_masuk" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_p_status">Status Penghuni</label>
+                    <select id="edit_p_status" required>
+                        <option value="true">Aktif</option>
+                        <option value="false">Non-Aktif</option>
+                    </select>
+                </div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                    <button type="button" class="btn-outline" onclick="closeEditPenghuniModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Tagihan -->
+    <div id="modalEditTagihan" class="modal-overlay" onclick="closeEditTagihanModal()">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalEditTagihanTitle" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <h4 id="modalEditTagihanTitle">Edit Data Tagihan</h4>
+                <button type="button" class="btn-outline btn-sm" onclick="closeEditTagihanModal()"><i data-icon="x"></i>Tutup</button>
+            </div>
+            <form id="editTagihanForm">
+                <input type="hidden" id="edit_tagihan_id">
+                <div class="form-group">
+                    <label>Penghuni & Kamar</label>
+                    <input type="text" id="edit_t_penghuni_info" disabled style="opacity: 0.7;">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_t_bulan">Bulan Tagihan</label>
+                        <select id="edit_t_bulan" required>
+                            <option value="1">Januari</option>
+                            <option value="2">Februari</option>
+                            <option value="3">Maret</option>
+                            <option value="4">April</option>
+                            <option value="5">Mei</option>
+                            <option value="6">Juni</option>
+                            <option value="7">Juli</option>
+                            <option value="8">Agustus</option>
+                            <option value="9">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_t_tahun">Tahun Tagihan</label>
+                        <input type="number" id="edit_t_tahun" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_t_nominal_dasar">Nominal Dasar (Rp)</label>
+                        <input type="number" id="edit_t_nominal_dasar" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_t_nominal_denda">Nominal Denda (Rp)</label>
+                        <input type="number" id="edit_t_nominal_denda" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit_t_jatuh_tempo">Tanggal Batas Jatuh Tempo</label>
+                    <input type="date" id="edit_t_jatuh_tempo" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_t_status">Status Tagihan</label>
+                    <select id="edit_t_status" required>
+                        <option value="belum_bayar">Belum Bayar</option>
+                        <option value="menunggu_verifikasi">Menunggu Verifikasi</option>
+                        <option value="lunas">Lunas</option>
+                        <option value="ditolak">Ditolak</option>
+                    </select>
+                </div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                    <button type="button" class="btn-outline" onclick="closeEditTagihanModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Arus Kas -->
+    <div id="modalEditKas" class="modal-overlay" onclick="closeEditKasModal()">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalEditKasTitle" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <h4 id="modalEditKasTitle">Edit Transaksi Arus Kas</h4>
+                <button type="button" class="btn-outline btn-sm" onclick="closeEditKasModal()"><i data-icon="x"></i>Tutup</button>
+            </div>
+            <form id="editKasForm">
+                <input type="hidden" id="edit_kas_id">
+                <div class="form-group">
+                    <label for="edit_k_jenis">Jenis Transaksi</label>
+                    <select id="edit_k_jenis" required>
+                        <option value="pemasukan">Pemasukan (+)</option>
+                        <option value="pengeluaran">Pengeluaran (-)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_k_nominal">Nominal (Rp)</label>
+                    <input type="number" id="edit_k_nominal" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_k_tanggal">Tanggal Transaksi</label>
+                    <input type="date" id="edit_k_tanggal" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_k_keterangan">Keterangan Transaksi</label>
+                    <input type="text" id="edit_k_keterangan" required>
+                </div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                    <button type="button" class="btn-outline" onclick="closeEditKasModal()">Batal</button>
+                </div>
+            </form>
         </div>
     </div>
 

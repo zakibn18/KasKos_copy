@@ -52,4 +52,30 @@ const deleteKamar = async (req, res) => {
     }
 };
 
-module.exports = { getKamar, createKamar, deleteKamar };
+const updateKamar = async (req, res) => {
+    const { id } = req.params;
+    const { nomor_kamar, tarif_bulanan, status_kamar } = req.body;
+    try {
+        if (!nomor_kamar || !tarif_bulanan) {
+            return res.status(400).json({ status: 'error', message: 'Nomor kamar dan tarif bulanan wajib diisi.' });
+        }
+
+        const { data, error } = await supabase
+            .from('kamar')
+            .update({
+                nomor_kamar,
+                tarif_bulanan: Number(tarif_bulanan),
+                status_kamar: status_kamar || 'Tersedia'
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        res.status(200).json({ status: 'success', message: 'Data kamar berhasil diperbarui', data });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+};
+
+module.exports = { getKamar, createKamar, deleteKamar, updateKamar };

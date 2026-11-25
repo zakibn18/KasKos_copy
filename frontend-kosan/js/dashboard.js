@@ -5,11 +5,15 @@ const API_URL = window.location.hostname === 'localhost' || window.location.host
 let token = localStorage.getItem('token');
 let currentUser = null;
 let penghuniListCache = [];
+let kamarListCache = [];
+let tagihanListCache = [];
+let kasListCache = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     setupNavigation();
     loadDashboardData();
+    setupEditFormListeners();
 });
 
 // 1. Autentikasi Pengelola
@@ -151,15 +155,22 @@ async function loadKamar() {
         const tbody = document.getElementById('tbody-kamar');
         tbody.innerHTML = '';
 
-        if (result.data && result.data.length > 0) {
-            result.data.forEach(k => {
+        kamarListCache = result.data || [];
+
+        if (kamarListCache.length > 0) {
+            kamarListCache.forEach(k => {
                 const badgeClass = k.status_kamar === 'Tersedia' ? 'badge-lunas' : 'badge-menunggu';
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>Kamar ${k.nomor_kamar}</strong></td>
                         <td>Rp ${parseInt(k.tarif_bulanan).toLocaleString('id-ID')}</td>
                         <td><span class="badge ${badgeClass}">${k.status_kamar}</span></td>
-                        <td><button type="button" class="btn-danger btn-sm" onclick="hapusKamar('${k.id}')">Hapus</button></td>
+                        <td>
+                            <div class="cell-actions">
+                                <button type="button" class="btn-primary btn-sm" onclick="openEditKamar('${k.id}')">Edit</button>
+                                <button type="button" class="btn-danger btn-sm" onclick="hapusKamar('${k.id}')">Hapus</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -169,6 +180,22 @@ async function loadKamar() {
     } catch (err) {
         console.error("Gagal memuat kamar:", err);
     }
+}
+
+function openEditKamar(kamarId) {
+    const kamar = kamarListCache.find(k => k.id === kamarId);
+    if (!kamar) return;
+
+    document.getElementById('edit_kamar_id').value = kamar.id;
+    document.getElementById('edit_nomor_kamar').value = kamar.nomor_kamar;
+    document.getElementById('edit_tarif_bulanan').value = kamar.tarif_bulanan;
+    document.getElementById('edit_status_kamar').value = kamar.status_kamar;
+
+    document.getElementById('modalEditKamar').classList.add('active');
+}
+
+function closeEditKamarModal() {
+    document.getElementById('modalEditKamar').classList.remove('active');
 }
 
 document.getElementById('kamarForm').addEventListener('submit', async (e) => {
@@ -251,9 +278,12 @@ async function loadPenghuni() {
                         <td>${tgl}</td>
                         <td><span class="badge ${statusBadge}">${p.status_aktif ? 'Aktif' : 'Non-Aktif'}</span></td>
                         <td>
-                            <button type="button" class="btn-outline btn-sm" onclick="toggleStatusPenghuni('${p.id}', ${!p.status_aktif})">
-                                ${p.status_aktif ? 'Nonaktifkan' : 'Aktifkan'}
-                            </button>
+                            <div class="cell-actions">
+                                <button type="button" class="btn-primary btn-sm" onclick="openEditPenghuni('${p.id}')">Edit</button>
+                                <button type="button" class="btn-outline btn-sm" onclick="toggleStatusPenghuni('${p.id}', ${!p.status_aktif})">
+                                    ${p.status_aktif ? 'Nonaktifkan' : 'Aktifkan'}
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -278,6 +308,47 @@ async function loadPenghuni() {
     } catch (err) {
         console.error('Gagal memuat penghuni:', err);
     }
+}
+
+async function openEditPenghuni(penghuniId) {
+    const penghuni = penghuniListCache.find(p => p.id === penghuniId);
+    if (!penghuni) return;
+
+    document.getElementById('edit_penghuni_id').value = penghuni.id;
+    document.getElementById('edit_p_nama').value = penghuni.users?.nama_lengkap || '';
+    document.getElementById('edit_p_telepon').value = penghuni.users?.no_telepon || '';
+    document.getElementById('edit_p_tgl_masuk').value = penghuni.tanggal_masuk ? penghuni.tanggal_masuk.split('T')[0] : '';
+    document.getElementById('edit_p_status').value = penghuni.status_aktif ? 'true' : 'false';
+
+    // Isi opsi kamar: kamar saat ini + semua kamar yang berstatus Tersedia
+    const selKamar = document.getElementById('edit_p_kamar');
+    selKamar.innerHTML = '';
+
+    // Tambah kamar saat ini
+    if (penghuni.kamar) {
+        selKamar.innerHTML += `<option value="${penghuni.kamar.id}" selected>Kamar ${penghuni.kamar.nomor_kamar} (Saat Ini)</option>`;
+    }
+
+    // Ambil kamar tersedia lainnya
+    try {
+        const resKamar = await fetch(`${API_URL}/kamar?status=Tersedia`);
+        const resKam = await resKamar.json();
+        if (resKam.data) {
+            resKam.data.forEach(k => {
+                if (!penghuni.kamar || k.id !== penghuni.kamar.id) {
+                    selKamar.innerHTML += `<option value="${k.id}">Kamar ${k.nomor_kamar} (Tersedia - Rp ${Number(k.tarif_bulanan).toLocaleString('id-ID')})</option>`;
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Gagal mengambil kamar tersedia:', e);
+    }
+
+    document.getElementById('modalEditPenghuni').classList.add('active');
+}
+
+function closeEditPenghuniModal() {
+    document.getElementById('modalEditPenghuni').classList.remove('active');
 }
 
 document.getElementById('penghuniForm').addEventListener('submit', async (e) => {
@@ -359,6 +430,7 @@ async function loadTagihan() {
         const resTagihan = await fetch(`${API_URL}/tagihan`, { headers: { Authorization: `Bearer ${token}` } });
         const jsonTagihan = await resTagihan.json();
         const list = jsonTagihan.data || [];
+        tagihanListCache = list;
         const tbody = document.getElementById('tbody-tagihan');
         tbody.innerHTML = '';
 
@@ -376,14 +448,63 @@ async function loadTagihan() {
                         <td><strong class="cell-strong">Rp ${Number(t.total_tagihan).toLocaleString('id-ID')}</strong></td>
                         <td>${t.tanggal_jatuh_tempo || '-'}</td>
                         <td><span class="badge ${getBadgeClass(t.status_tagihan)}">${formatStatus(t.status_tagihan)}</span></td>
+                        <td>
+                            <div class="cell-actions">
+                                <button type="button" class="btn-primary btn-sm" onclick="openEditTagihan('${t.id}')">Edit</button>
+                                <button type="button" class="btn-danger btn-sm" onclick="hapusTagihan('${t.id}')">Hapus</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
         } else {
-            tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Belum ada tagihan yang diterbitkan.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="table-empty">Belum ada tagihan yang diterbitkan.</td></tr>`;
         }
     } catch (err) {
         console.error('Gagal memuat tagihan:', err);
+    }
+}
+
+function openEditTagihan(tagihanId) {
+    const t = tagihanListCache.find(item => item.id === tagihanId);
+    if (!t) return;
+
+    document.getElementById('edit_tagihan_id').value = t.id;
+    const nama = t.penghuni?.users?.nama_lengkap || 'Penghuni';
+    const kamar = t.penghuni?.kamar?.nomor_kamar || '-';
+    document.getElementById('edit_t_penghuni_info').value = `${nama} (Kamar ${kamar})`;
+
+    document.getElementById('edit_t_bulan').value = t.bulan_tagihan;
+    document.getElementById('edit_t_tahun').value = t.tahun_tagihan;
+    document.getElementById('edit_t_nominal_dasar').value = t.nominal_dasar;
+    document.getElementById('edit_t_nominal_denda').value = t.nominal_denda || 0;
+    document.getElementById('edit_t_jatuh_tempo').value = t.tanggal_jatuh_tempo ? t.tanggal_jatuh_tempo.split('T')[0] : '';
+    document.getElementById('edit_t_status').value = t.status_tagihan;
+
+    document.getElementById('modalEditTagihan').classList.add('active');
+}
+
+function closeEditTagihanModal() {
+    document.getElementById('modalEditTagihan').classList.remove('active');
+}
+
+async function hapusTagihan(id) {
+    if (!confirm('Yakin ingin menghapus tagihan ini? Data tagihan akan dihapus permanen.')) return;
+    try {
+        const res = await fetch(`${API_URL}/tagihan/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const result = await res.json();
+        if (res.ok) {
+            notify('Tagihan berhasil dihapus!');
+            loadTagihan();
+            loadDashboardData();
+        } else {
+            notify(result.message || 'Gagal menghapus tagihan.');
+        }
+    } catch (e) {
+        notify('Terjadi kesalahan saat menghapus tagihan.');
     }
 }
 
@@ -527,6 +648,7 @@ async function loadKas() {
         const tbody = document.getElementById('tbody-kas');
         tbody.innerHTML = '';
         const list = result.transaksi || [];
+        kasListCache = list;
 
         if (list.length > 0) {
             list.forEach(k => {
@@ -539,14 +661,57 @@ async function loadKas() {
                         <td>${k.keterangan || '-'}</td>
                         <td><span class="badge ${badgeClass}">${isPemasukan ? 'Pemasukan' : 'Pengeluaran'}</span></td>
                         <td><strong class="${isPemasukan ? 'val-pos' : 'val-neg'}">${sign} Rp ${Number(k.nominal).toLocaleString('id-ID')}</strong></td>
+                        <td>
+                            <div class="cell-actions">
+                                <button type="button" class="btn-primary btn-sm" onclick="openEditKas('${k.id}')">Edit</button>
+                                <button type="button" class="btn-danger btn-sm" onclick="hapusKas('${k.id}')">Hapus</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
         } else {
-            tbody.innerHTML = `<tr><td colspan="4" class="table-empty">Belum ada catatan transaksi arus kas.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Belum ada catatan transaksi arus kas.</td></tr>`;
         }
     } catch (err) {
         console.error('Gagal memuat arus kas:', err);
+    }
+}
+
+function openEditKas(kasId) {
+    const k = kasListCache.find(item => item.id === kasId);
+    if (!k) return;
+
+    document.getElementById('edit_kas_id').value = k.id;
+    document.getElementById('edit_k_jenis').value = k.jenis;
+    document.getElementById('edit_k_nominal').value = k.nominal;
+    document.getElementById('edit_k_tanggal').value = k.tanggal_transaksi ? k.tanggal_transaksi.split('T')[0] : '';
+    document.getElementById('edit_k_keterangan').value = k.keterangan || '';
+
+    document.getElementById('modalEditKas').classList.add('active');
+}
+
+function closeEditKasModal() {
+    document.getElementById('modalEditKas').classList.remove('active');
+}
+
+async function hapusKas(id) {
+    if (!confirm('Yakin ingin menghapus catatan arus kas ini?')) return;
+    try {
+        const res = await fetch(`${API_URL}/kas/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const result = await res.json();
+        if (res.ok) {
+            notify('Transaksi arus kas berhasil dihapus!');
+            loadKas();
+            loadDashboardData();
+        } else {
+            notify(result.message || 'Gagal menghapus arus kas.');
+        }
+    } catch (e) {
+        notify('Terjadi kesalahan saat menghapus transaksi kas.');
     }
 }
 
@@ -664,4 +829,159 @@ function viewBukti(url) {
 function closeModalBukti() {
     const modal = document.getElementById('modalBukti');
     modal.classList.remove('active');
+}
+
+// ==========================================
+// FORM LISTENERS UNTUK FITUR EDIT PENGELOLA
+// ==========================================
+function setupEditFormListeners() {
+    // 1. Submit Edit Kamar
+    const editKamarForm = document.getElementById('editKamarForm');
+    if (editKamarForm) {
+        editKamarForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_kamar_id').value;
+            const data = {
+                nomor_kamar: document.getElementById('edit_nomor_kamar').value.trim(),
+                tarif_bulanan: document.getElementById('edit_tarif_bulanan').value,
+                status_kamar: document.getElementById('edit_status_kamar').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/kamar/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    notify('Data kamar berhasil diperbarui!');
+                    closeEditKamarModal();
+                    loadKamar();
+                    loadDashboardData();
+                } else {
+                    notify(result.message || 'Gagal memperbarui kamar.');
+                }
+            } catch (err) {
+                notify('Terjadi kesalahan saat menyimpan perubahan kamar.');
+            }
+        });
+    }
+
+    // 2. Submit Edit Penghuni
+    const editPenghuniForm = document.getElementById('editPenghuniForm');
+    if (editPenghuniForm) {
+        editPenghuniForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_penghuni_id').value;
+            const data = {
+                nama_lengkap: document.getElementById('edit_p_nama').value.trim(),
+                no_telepon: document.getElementById('edit_p_telepon').value.trim(),
+                kamar_id: document.getElementById('edit_p_kamar').value,
+                tanggal_masuk: document.getElementById('edit_p_tgl_masuk').value,
+                status_aktif: document.getElementById('edit_p_status').value === 'true'
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/penghuni/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    notify('Data penghuni berhasil diperbarui!');
+                    closeEditPenghuniModal();
+                    loadPenghuni();
+                    loadDashboardData();
+                } else {
+                    notify(result.message || 'Gagal memperbarui data penghuni.');
+                }
+            } catch (err) {
+                notify('Terjadi kesalahan saat menyimpan data penghuni.');
+            }
+        });
+    }
+
+    // 3. Submit Edit Tagihan
+    const editTagihanForm = document.getElementById('editTagihanForm');
+    if (editTagihanForm) {
+        editTagihanForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_tagihan_id').value;
+            const data = {
+                bulan_tagihan: document.getElementById('edit_t_bulan').value,
+                tahun_tagihan: document.getElementById('edit_t_tahun').value,
+                nominal_dasar: document.getElementById('edit_t_nominal_dasar').value,
+                nominal_denda: document.getElementById('edit_t_nominal_denda').value || 0,
+                tanggal_jatuh_tempo: document.getElementById('edit_t_jatuh_tempo').value,
+                status_tagihan: document.getElementById('edit_t_status').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/tagihan/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    notify('Data tagihan berhasil diperbarui!');
+                    closeEditTagihanModal();
+                    loadTagihan();
+                    loadDashboardData();
+                } else {
+                    notify(result.message || 'Gagal memperbarui tagihan.');
+                }
+            } catch (err) {
+                notify('Terjadi kesalahan saat menyimpan tagihan.');
+            }
+        });
+    }
+
+    // 4. Submit Edit Arus Kas
+    const editKasForm = document.getElementById('editKasForm');
+    if (editKasForm) {
+        editKasForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_kas_id').value;
+            const data = {
+                jenis: document.getElementById('edit_k_jenis').value,
+                nominal: document.getElementById('edit_k_nominal').value,
+                tanggal_transaksi: document.getElementById('edit_k_tanggal').value,
+                keterangan: document.getElementById('edit_k_keterangan').value.trim()
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/kas/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    notify('Transaksi arus kas berhasil diperbarui!');
+                    closeEditKasModal();
+                    loadKas();
+                    loadDashboardData();
+                } else {
+                    notify(result.message || 'Gagal memperbarui transaksi kas.');
+                }
+            } catch (err) {
+                notify('Terjadi kesalahan saat menyimpan transaksi kas.');
+            }
+        });
+    }
 }

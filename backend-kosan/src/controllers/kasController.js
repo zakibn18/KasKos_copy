@@ -59,3 +59,39 @@ exports.tambahKas = async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+exports.updateKas = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { jenis, nominal, tanggal_transaksi, keterangan } = req.body;
+
+    const updateData = {};
+    if (jenis) updateData.jenis = jenis;
+    if (nominal !== undefined) updateData.nominal = Number(nominal);
+    if (tanggal_transaksi) updateData.tanggal_transaksi = tanggal_transaksi;
+    if (keterangan) updateData.keterangan = keterangan;
+
+    const { data, error } = await supabase
+      .from('arus_kas')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ status: 'error', message: error.message });
+    res.status(200).json({ status: 'success', message: 'Transaksi arus kas berhasil diperbarui!', data });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
+exports.deleteKas = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabase.from('arus_kas').delete().eq('id', id);
+    if (error) return res.status(500).json({ status: 'error', message: error.message });
+    res.status(200).json({ status: 'success', message: 'Transaksi arus kas berhasil dihapus!' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};

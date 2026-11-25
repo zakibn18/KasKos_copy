@@ -220,7 +220,13 @@
 
         <!-- 6. Halaman Profil Penghuni -->
         <div id="page-profil" class="page-section panel">
-            <h3 class="section-title" style="margin-bottom: 20px;">Profil Penghuni</h3>
+            <div class="section-head" style="margin-bottom: 20px;">
+                <div>
+                    <h3 class="section-title">Profil Penghuni</h3>
+                    <p class="section-desc">Data pribadi dan rincian kamar yang Anda tempati.</p>
+                </div>
+                <button type="button" class="btn-primary" onclick="openEditProfilModal()"><i data-icon="pencil"></i>Edit Profil Saya</button>
+            </div>
             <dl class="profile-list">
                 <dt>Nama lengkap</dt><dd id="prof-nama">-</dd>
                 <dt>Email</dt><dd id="prof-email">-</dd>
@@ -233,6 +239,34 @@
         </div>
 
     </main>
+
+    <!-- Modal Edit Profil Penghuni -->
+    <div id="modalEditProfil" class="modal-overlay" onclick="closeEditProfilModal()">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalEditProfilTitle" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <h4 id="modalEditProfilTitle">Edit Profil Saya</h4>
+                <button type="button" class="btn-outline btn-sm" onclick="closeEditProfilModal()"><i data-icon="x"></i>Tutup</button>
+            </div>
+            <form id="editProfilForm">
+                <div class="form-group">
+                    <label for="edit_prof_nama">Nama Lengkap</label>
+                    <input type="text" id="edit_prof_nama" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_prof_telepon">No. Telepon / WhatsApp</label>
+                    <input type="text" id="edit_prof_telepon" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_prof_password">Password Baru (Opsional)</label>
+                    <input type="password" id="edit_prof_password" placeholder="Kosongkan jika tidak ingin mengubah password">
+                </div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                    <button type="button" class="btn-outline" onclick="closeEditProfilModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Modal Pratinjau Gambar Bukti -->
     <div id="modalBukti" class="modal-overlay" onclick="closeModalBukti()">

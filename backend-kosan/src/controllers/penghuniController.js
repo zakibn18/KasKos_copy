@@ -109,4 +109,105 @@ const toggleStatusPenghuni = async (req, res) => {
     }
 };
 
-module.exports = { getPenghuni, registerPenghuni, getProfilPenghuni, toggleStatusPenghuni };
+const updatePenghuni = async (req, res) => {
+    const { id } = req.params;
+    const { nama_lengkap, no_telepon, kamar_id, tanggal_masuk, status_aktif } = req.body;
+
+    try {
+        // 1. Ambil data penghuni saat ini
+        const { data: currentPenghuni, error: fetchErr } = await supabase
+            .from('penghuni')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !currentPenghuni) {
+            return res.status(404).json({ status: 'error', message: 'Data penghuni tidak ditemukan.' });
+        }
+
+        // 2. Update data users jika nama_lengkap atau no_telepon diubah
+        if (nama_lengkap || no_telepon !== undefined) {
+            const userUpdate = {};
+            if (nama_lengkap) userUpdate.nama_lengkap = nama_lengkap;
+            if (no_telepon !== undefined) userUpdate.no_telepon = no_telepon;
+
+            await supabase
+                .from('users')
+                .update(userUpdate)
+                .eq('id', currentPenghuni.user_id);
+        }
+
+        // 3. Jika kamar berpindah, perbarui status kamar lama dan baru
+        if (kamar_id && kamar_id !== currentPenghuni.kamar_id) {
+            // Kamar lama jadi Tersedia
+            if (currentPenghuni.kamar_id) {
+                await supabase
+                    .from('kamar')
+                    .update({ status_kamar: 'Tersedia' })
+                    .eq('id', currentPenghuni.kamar_id);
+            }
+            // Kamar baru jadi Terisi
+            await supabase
+                .from('kamar')
+                .update({ status_kamar: 'Terisi' })
+                .eq('id', kamar_id);
+        }
+
+        // 4. Update tabel penghuni
+        const penghuniUpdate = {};
+        if (kamar_id) penghuniUpdate.kamar_id = kamar_id;
+        if (tanggal_masuk) penghuniUpdate.tanggal_masuk = tanggal_masuk;
+        if (status_aktif !== undefined) penghuniUpdate.status_aktif = status_aktif;
+
+        const { data: updatedPenghuni, error: updateErr } = await supabase
+            .from('penghuni')
+            .update(penghuniUpdate)
+            .eq('id', id)
+            .select('*, users(*), kamar(*)')
+            .single();
+
+        if (updateErr) throw updateErr;
+
+        res.status(200).json({ status: 'success', message: 'Data penghuni berhasil diperbarui!', data: updatedPenghuni });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+};
+
+const updateProfilPenghuni = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { nama_lengkap, no_telepon, password } = req.body;
+
+        const updateData = {};
+        if (nama_lengkap) updateData.nama_lengkap = nama_lengkap;
+        if (no_telepon !== undefined) updateData.no_telepon = no_telepon;
+        if (password && password.trim() !== '') updateData.password = password;
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ status: 'error', message: 'Tidak ada data yang diubah.' });
+        }
+
+        const { data, error } = await supabase
+            .from('users')
+            .update(updateData)
+            .eq('id', userId)
+            .select('id, nama_lengkap, email, no_telepon, role')
+            .single();
+
+        if (error) throw error;
+
+        res.status(200).json({ status: 'success', message: 'Profil Anda berhasil diperbarui!', data });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+};
+
+module.exports = {
+    getPenghuni,
+    registerPenghuni,
+    getProfilPenghuni,
+    toggleStatusPenghuni,
+    updatePenghuni,
+    updateProfilPenghuni
+};
