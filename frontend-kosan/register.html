@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Dinonaktifkan - KasKos</title>
+    <meta name="color-scheme" content="dark">
+    <title>Pendaftaran Ditutup - KasKos</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        body { justify-content: center; align-items: center; }
-        .auth-wrapper { width: 100%; max-width: 450px; padding: 20px; }
-    </style>
 </head>
-<body>
-    <div class="auth-wrapper">
-        <div class="glass-panel" style="text-align: center;">
-            <h2 style="color: var(--accent); margin-bottom: 8px;">KasKos.</h2>
-            <div style="font-size: 40px; margin: 16px 0;">🔒</div>
-            <h3 style="color: var(--text-primary); margin-bottom: 12px;">Pendaftaran Publik Ditutup</h3>
-            <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
-                Demi keamanan sistem, pembuatan akun baru tidak dapat dilakukan secara mandiri.
-                <br><br>
-                • <strong>Penghuni:</strong> Akun Anda akan dibuatkan langsung oleh Pengelola Kos setelah penempatan kamar.<br>
-                • <strong>Pengelola:</strong> Akses akun pengelola bersifat privat dan terbatas.
+<body class="auth-page">
+    <main class="auth-wrapper wide">
+        <div class="auth-card" style="text-align: center;">
+            <div class="brand">
+                <span class="brand-mark"><i data-icon="home"></i></span>
+                KasKos
+            </div>
+            <div class="auth-icon"><i data-icon="lock"></i></div>
+            <h1 class="section-title" style="margin-bottom: 8px;">Pendaftaran Publik Ditutup</h1>
+            <p class="section-desc" style="margin: 0 auto;">
+                Demi keamanan sistem, akun baru tidak dapat dibuat secara mandiri.
             </p>
-            <a href="index.html" class="btn-primary" style="display: inline-block; text-decoration: none; padding: 12px 24px;">
-                Kembali ke Halaman Login
-            </a>
+            <ul class="auth-list">
+                <li><strong>Penghuni:</strong> akun dibuatkan langsung oleh Pengelola Kos setelah penempatan kamar.</li>
+                <li><strong>Pengelola:</strong> akses akun pengelola bersifat privat dan terbatas.</li>
+            </ul>
+            <a href="index.html" class="btn-primary btn-block">Kembali ke halaman masuk</a>
         </div>
-    </div>
+    </main>
+    <script src="js/ui.js"></script>
 </body>
 </html>

@@ -97,10 +97,10 @@ async function loadDashboardPenghuni() {
             reminders.forEach(t => {
                 const isOverdue = t.isOverdue;
                 const bannerClass = isOverdue ? 'alert-danger' : 'alert-warning';
-                const icon = isOverdue ? '🚨' : '⏰';
+                const bannerIcon = isOverdue ? 'alert-circle' : 'clock';
                 reminderContainer.innerHTML += `
-                    <div class="alert-banner ${bannerClass}">
-                        <span style="font-size: 18px;">${icon}</span>
+                    <div class="alert-banner ${bannerClass}" role="alert">
+                        ${icon(bannerIcon)}
                         <div>
                             <strong>Peringatan Tagihan Periode ${t.bulan_tagihan}/${t.tahun_tagihan}:</strong> ${t.reminder}
                         </div>
@@ -150,7 +150,7 @@ function renderTableTagihan(data) {
     tbody.innerHTML = '';
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px;">Belum ada data tagihan kos yang diterbitkan.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Belum ada data tagihan kos yang diterbitkan.</td></tr>`;
         return;
     }
 
@@ -165,13 +165,13 @@ function renderTableTagihan(data) {
                 <td>Kamar ${nomorKamar}</td>
                 <td>Rp ${Number(t.nominal_dasar).toLocaleString('id-ID')}</td>
                 <td>Rp ${Number(t.nominal_denda || 0).toLocaleString('id-ID')}</td>
-                <td><strong style="color: var(--accent);">Rp ${Number(t.total_tagihan).toLocaleString('id-ID')}</strong></td>
+                <td><strong class="cell-strong">Rp ${Number(t.total_tagihan).toLocaleString('id-ID')}</strong></td>
                 <td>${t.tanggal_jatuh_tempo || '-'}</td>
                 <td><span class="badge ${getBadgeClass(status)}">${formatStatus(status)}</span></td>
                 <td>
                     ${canUpload
-                        ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="goToUpload('${t.id}')">Unggah Bukti</button>`
-                        : `<span style="color: var(--status-lunas); font-size: 13px;">✓ Lunas</span>`
+                        ? `<button type="button" class="btn-primary btn-sm" onclick="goToUpload('${t.id}')">Unggah Bukti</button>`
+                        : `<span class="badge badge-lunas">Lunas</span>`
                     }
                 </td>
             </tr>
@@ -180,9 +180,8 @@ function renderTableTagihan(data) {
 }
 
 function goToUpload(tagihanId) {
-    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
     const uploadMenu = document.querySelector('.menu-item[data-target="page-upload"]');
-    if (uploadMenu) uploadMenu.classList.add('active');
+    setActiveNav(uploadMenu);
 
     document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
     document.getElementById('page-upload').classList.add('active');
@@ -250,12 +249,12 @@ function setupUploadForm() {
         const resultBody = document.getElementById('ocr-result-body');
 
         if (!tagihanId) {
-            alert('Silakan pilih tagihan yang akan dibayar terlebih dahulu.');
+            notify('Silakan pilih tagihan yang akan dibayar terlebih dahulu.');
             return;
         }
 
         if (!fileInput.files || !fileInput.files[0]) {
-            alert('Silakan pilih file foto bukti transfer.');
+            notify('Silakan pilih file foto bukti transfer.');
             return;
         }
 
@@ -263,8 +262,7 @@ function setupUploadForm() {
         formData.append('tagihan_id', tagihanId);
         formData.append('bukti', fileInput.files[0]);
 
-        btn.disabled = true;
-        btn.textContent = '⏳ Sedang Memindai OCR & Memverifikasi...';
+        const resetBtn = setLoading(btn, 'Memindai & memverifikasi...');
         resultCard.style.display = 'none';
 
         try {
@@ -281,19 +279,19 @@ function setupUploadForm() {
                 const isAuto = result.is_valid_otomatis;
 
                 resultTitle.innerHTML = isAuto
-                    ? '✅ Verifikasi OCR Berhasil (Lunas Otomatis)!'
-                    : '⚠️ Bukti Diteruskan ke Verifikasi Manual Pengelola';
-                resultTitle.style.color = isAuto ? 'var(--status-lunas)' : 'var(--status-menunggu)';
+                    ? icon('check-circle') + 'Verifikasi OCR berhasil (lunas otomatis)'
+                    : icon('alert-triangle') + 'Bukti diteruskan ke verifikasi manual pengelola';
+                resultTitle.className = isAuto ? 'val-pos' : 'val-warn';
 
                 const ocr = result.ocr_data || {};
                 resultBody.innerHTML = `
-                    <p style="margin-bottom: 10px; font-weight: 500;">${result.message}</p>
-                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">
-                        <strong>Detail Ekstraksi OCR AI:</strong><br>
+                    <p style="margin-bottom: 10px;">${esc(result.message)}</p>
+                    <div class="detail">
+                        <strong>Detail ekstraksi OCR</strong><br>
                         • Nominal Terbaca: <strong>${ocr.nominal_terbaca ? 'Rp ' + Number(ocr.nominal_terbaca).toLocaleString('id-ID') : 'Tidak Terbaca Jelas'}</strong><br>
                         • Nominal Tagihan: <strong>Rp ${Number(ocr.nominal_tagihan).toLocaleString('id-ID')}</strong><br>
-                        • Tanggal Terbaca: ${ocr.tanggal || '-'}<br>
-                        • Nama Pengirim: ${ocr.nama_pengirim || '-'}
+                        • Tanggal Terbaca: ${esc(ocr.tanggal || '-')}<br>
+                        • Nama Pengirim: ${esc(ocr.nama_pengirim || '-')}
                     </div>
                 `;
 
@@ -301,14 +299,13 @@ function setupUploadForm() {
                 document.getElementById('image-preview-container').style.display = 'none';
                 loadDashboardPenghuni();
             } else {
-                alert(result.message || 'Gagal mengunggah bukti.');
+                notify(result.message || 'Gagal mengunggah bukti.');
             }
         } catch (err) {
             console.error('Upload error:', err);
-            alert('Terjadi kesalahan jaringan atau server saat mengunggah.');
+            notify('Terjadi kesalahan jaringan atau server saat mengunggah.');
         } finally {
-            btn.disabled = false;
-            btn.textContent = '🔍 Unggah & Verifikasi dengan OCR AI';
+            resetBtn();
         }
     });
 }
@@ -325,14 +322,14 @@ async function loadRiwayatPembayaran() {
 
         tbody.innerHTML = '';
         if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">Belum ada riwayat pembayaran yang diunggah.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Belum ada riwayat pembayaran yang diunggah.</td></tr>`;
             return;
         }
 
         data.forEach(p => {
             const periode = p.tagihan ? `${p.tagihan.bulan_tagihan}/${p.tagihan.tahun_tagihan}` : '-';
             const totalTagihan = p.tagihan ? `Rp ${Number(p.tagihan.total_tagihan).toLocaleString('id-ID')}` : '-';
-            const ocrNominal = p.ocr_nominal_terbaca ? `Rp ${Number(p.ocr_nominal_terbaca).toLocaleString('id-ID')}` : '<span style="color:var(--text-tertiary)">-</span>';
+            const ocrNominal = p.ocr_nominal_terbaca ? `Rp ${Number(p.ocr_nominal_terbaca).toLocaleString('id-ID')}` : '<span class="cell-muted">-</span>';
             const pengirim = p.ocr_nama_pengirim || '-';
             const tglUpload = p.tanggal_upload ? new Date(p.tanggal_upload).toLocaleString('id-ID') : '-';
 
@@ -346,7 +343,7 @@ async function loadRiwayatPembayaran() {
                     <td><span class="badge ${getBadgeClass(p.status_verifikasi)}">${formatStatus(p.status_verifikasi)}</span></td>
                     <td>
                         ${p.url_bukti_transfer
-                            ? `<button class="btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="viewBukti('${p.url_bukti_transfer}')">Lihat Bukti</button>`
+                            ? `<button type="button" class="btn-outline btn-sm" onclick="viewBukti('${p.url_bukti_transfer}')">Lihat Bukti</button>`
                             : '-'
                         }
                     </td>
@@ -380,16 +377,16 @@ async function tanyaAI(optionId) {
 
         if (res.ok) {
             responseBox.innerHTML = `
-                <div style="font-weight: 600; color: var(--accent); margin-bottom: 8px;">
+                <div class="ai-question">
                     Pertanyaan: "${data.pertanyaan}"
                 </div>
                 <div>${formatAIText(data.jawaban)}</div>
             `;
         } else {
-            responseBox.innerHTML = `<span style="color: var(--status-ditolak);">${data.message || data.error || 'Gagal memproses pertanyaan.'}</span>`;
+            responseBox.innerHTML = `<span class="ai-error">${data.message || data.error || 'Gagal memproses pertanyaan.'}</span>`;
         }
     } catch (err) {
-        responseBox.innerHTML = `<span style="color: var(--status-ditolak);">Gagal terhubung ke server asisten AI.</span>`;
+        responseBox.innerHTML = `<span class="ai-error">Gagal terhubung ke server asisten AI.</span>`;
     } finally {
         loadingIndicator.style.display = 'none';
     }
@@ -439,6 +436,7 @@ function formatStatus(status) {
         'valid_manual': 'Disetujui Manual',
         'butuh_pengecekan_manual': 'Pengecekan Manual',
         'lunas': 'Lunas',
+        'terlambat': 'Terlambat',
         'ditolak': 'Ditolak'
     };
     return map[status] || status;
@@ -446,7 +444,7 @@ function formatStatus(status) {
 
 function formatAIText(text) {
     if (!text) return '';
-    return text
+    return esc(text)
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br>');
@@ -457,6 +455,7 @@ function viewBukti(url) {
     const img = document.getElementById('modalBuktiImg');
     img.src = url;
     modal.classList.add('active');
+    document.getElementById('modalBuktiClose')?.focus();
 }
 
 function closeModalBukti() {

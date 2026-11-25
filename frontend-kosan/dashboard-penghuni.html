@@ -3,36 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
     <title>Dashboard Penghuni - Sistem Informasi Kos</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Sidebar Menu Penghuni -->
-    <div class="sidebar">
-        <h2>KasKos.</h2>
-        <div class="menu-item active" data-target="page-dashboard">🏠 Dashboard Utama</div>
-        <div class="menu-item" data-target="page-tagihan">📋 Tagihan Saya</div>
-        <div class="menu-item" data-target="page-upload">📤 Upload Bukti & OCR</div>
-        <div class="menu-item" data-target="page-riwayat">📜 Riwayat Pembayaran</div>
-        <div class="menu-item" data-target="page-ai">🤖 Asisten Virtual AI</div>
-        <div class="menu-item" data-target="page-profil">👤 Profil Penghuni</div>
+    <a class="skip-link" href="#main">Lewati ke konten</a>
+
+    <div class="topbar">
+        <button type="button" id="menuToggle" class="btn-outline btn-sm" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="sidebar"><i data-icon="menu"></i></button>
+        <div class="brand"><span class="brand-mark"><i data-icon="home"></i></span>KasKos</div>
     </div>
+    <div id="scrim" class="scrim"></div>
+
+    <nav id="sidebar" class="sidebar" aria-label="Menu penghuni">
+        <div class="brand"><span class="brand-mark"><i data-icon="home"></i></span>KasKos</div>
+            <button type="button" class="menu-item active" data-target="page-dashboard"><i data-icon="home"></i>Dashboard Utama</button>
+            <button type="button" class="menu-item" data-target="page-tagihan"><i data-icon="receipt"></i>Tagihan Saya</button>
+            <button type="button" class="menu-item" data-target="page-upload"><i data-icon="upload"></i>Upload Bukti & OCR</button>
+            <button type="button" class="menu-item" data-target="page-riwayat"><i data-icon="history"></i>Riwayat Pembayaran</button>
+            <button type="button" class="menu-item" data-target="page-ai"><i data-icon="bot"></i>Asisten Virtual AI</button>
+            <button type="button" class="menu-item" data-target="page-profil"><i data-icon="user"></i>Profil Penghuni</button>
+    </nav>
     
-    <div class="main-content">
+    <main id="main" class="main-content">
         <div class="header">
             <div>
                 <h3 id="welcomeMessage">Halo, Penghuni</h3>
-                <p id="kamarInfo" style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">Memuat info kamar...</p>
+                <p id="kamarInfo">Memuat info kamar...</p>
             </div>
-            <button class="btn-outline" onclick="logout()">Keluar Akun</button>
+            <button type="button" class="btn-outline" onclick="logout()"><i data-icon="logout"></i>Keluar</button>
         </div>
 
         <!-- Banner Pengingat Jatuh Tempo Otomatis -->
-        <div id="reminder-banner"></div>
+        <div id="reminder-banner" role="region" aria-label="Pengingat tagihan"></div>
         
         <!-- 1. Halaman Dashboard Utama -->
-        <div id="page-dashboard" class="page-section active glass-panel">
-            <h3 style="color: var(--accent); margin-bottom: 20px;">Ringkasan Tagihan & Status</h3>
+        <div id="page-dashboard" class="page-section active panel">
+            <h3 class="section-title">Ringkasan Tagihan & Status</h3>
             <div class="grid-cards">
                 <div class="stat-card">
                     <h4>Tagihan Bulan Ini</h4>
@@ -40,7 +48,7 @@
                 </div>
                 <div class="stat-card">
                     <h4>Tanggal Jatuh Tempo</h4>
-                    <h2 id="stat-jatuh-tempo" style="font-size: 20px;">-</h2>
+                    <h2 id="stat-jatuh-tempo" class="val-sm">-</h2>
                 </div>
                 <div class="stat-card">
                     <h4>Status Pembayaran</h4>
@@ -48,27 +56,27 @@
                 </div>
                 <div class="stat-card">
                     <h4>Kamar</h4>
-                    <h2 id="stat-kamar" style="color: var(--accent);">-</h2>
+                    <h2 id="stat-kamar" class="val-accent">-</h2>
                 </div>
             </div>
 
-            <div style="background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 12px; border: 1px solid var(--glass-stroke); margin-top: 24px;">
-                <h4 style="color: var(--text-primary); margin-bottom: 8px;">ℹ️ Informasi Penting</h4>
-                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
-                    • Sistem otomatis membaca foto bukti transfer menggunakan teknologi <strong>AI OCR</strong>.<br>
-                    • Pastikan foto bukti transfer terlihat jelas pada nominal, tanggal transaksi, dan nama pengirim.<br>
-                    • Pembayaran dengan nominal tepat akan langsung <strong>Lunas Otomatis</strong>.<br>
-                    • Jika nominal tidak cocok atau gambar buram, bukti akan diteruskan ke pengecekan manual oleh pengelola kos.
-                </p>
+            <div class="info-box">
+                <h4><i data-icon="info"></i>Informasi Penting</h4>
+                <ul>
+                    <li>Sistem membaca foto bukti transfer secara otomatis dengan <strong>AI OCR</strong>.</li>
+                    <li>Pastikan nominal, tanggal transaksi, dan nama pengirim terlihat jelas pada foto.</li>
+                    <li>Pembayaran dengan nominal tepat langsung berstatus <strong>Lunas Otomatis</strong>.</li>
+                    <li>Jika nominal tidak cocok atau gambar buram, bukti diteruskan ke pengelola untuk dicek manual.</li>
+                </ul>
             </div>
         </div>
 
         <!-- 2. Halaman Tagihan Saya (Bulan Ini dan Bulan Depan) -->
-        <div id="page-tagihan" class="page-section glass-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div id="page-tagihan" class="page-section panel">
+            <div class="section-head">
                 <div>
-                    <h3 style="color: var(--accent);">Daftar Tagihan Kos</h3>
-                    <p style="color: var(--text-secondary); font-size: 13px;">Tagihan bulan ini dan bulan depan terpusat dalam satu tabel.</p>
+                    <h3 class="section-title">Daftar Tagihan Kos</h3>
+                    <p class="section-desc">Tagihan bulan ini dan bulan depan terpusat dalam satu tabel.</p>
                 </div>
             </div>
 
@@ -87,53 +95,51 @@
                         </tr>
                     </thead>
                     <tbody id="tbody-tagihan">
-                        <tr><td colspan="8" style="text-align:center;">Memuat tagihan...</td></tr>
+                        <tr><td colspan="8" class="table-empty">Memuat tagihan...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- 3. Halaman Upload Bukti Transfer & Verifikasi OCR -->
-        <div id="page-upload" class="page-section glass-panel">
-            <h3 style="color: var(--accent); margin-bottom: 8px;">Upload Bukti Transfer & Verifikasi OCR</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">
+        <div id="page-upload" class="page-section panel">
+            <h3 class="section-title">Upload Bukti Transfer & Verifikasi OCR</h3>
+            <p class="section-desc">
                 Unggah foto bukti transfer bank atau e-wallet. Sistem OCR cerdas akan otomatis membaca nominal dan memverifikasinya.
             </p>
 
-            <form id="uploadBuktiForm" style="max-width: 600px;">
+            <form id="uploadBuktiForm" class="form-card">
                 <div class="form-group">
-                    <label>Pilih Tagihan yang Akan Dibayar</label>
+                    <label for="select-tagihan-bayar">Pilih Tagihan yang Akan Dibayar</label>
                     <select id="select-tagihan-bayar" required>
                         <option value="">-- Memuat daftar tagihan belum lunas --</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Pilih Foto Bukti Transfer (JPG / PNG)</label>
-                    <input type="file" id="input-file-bukti" accept="image/*" required>
+                    <label for="input-file-bukti">Pilih Foto Bukti Transfer (JPG / PNG)</label>
+                    <input type="file" id="input-file-bukti" accept="image/jpeg,image/png" required>
                 </div>
 
-                <div id="image-preview-container" style="display: none; margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Pratinjau Foto Bukti:</label>
-                    <img id="image-preview" src="" alt="Pratinjau Bukti" style="max-width: 100%; max-height: 280px; border-radius: 8px; border: 1px solid var(--glass-stroke);">
+                <div id="image-preview-container" class="image-preview" style="display: none;">
+                    <p class="section-desc" style="margin: 0 0 6px;">Pratinjau foto bukti</p>
+                    <img id="image-preview" src="" alt="Pratinjau bukti transfer">
                 </div>
 
-                <button type="submit" id="btn-upload-ocr" class="btn-primary" style="padding: 12px 24px; font-size: 14px;">
-                    🔍 Unggah & Verifikasi dengan OCR AI
-                </button>
+                <button type="submit" id="btn-upload-ocr" class="btn-primary"><i data-icon="scan"></i>Unggah &amp; Verifikasi dengan OCR AI</button>
             </form>
 
             <!-- Card Hasil Verifikasi OCR -->
-            <div id="ocr-result-card" style="display: none; margin-top: 24px; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-stroke);">
-                <h4 id="ocr-result-title" style="margin-bottom: 12px; color: var(--accent);">Hasil Pembacaan OCR</h4>
-                <div id="ocr-result-body" style="font-size: 14px; line-height: 1.7; color: var(--text-secondary);"></div>
+            <div id="ocr-result-card" class="result-card" role="status" style="display: none;">
+                <h4 id="ocr-result-title">Hasil Pembacaan OCR</h4>
+                <div id="ocr-result-body"></div>
             </div>
         </div>
 
         <!-- 4. Halaman Riwayat Pembayaran -->
-        <div id="page-riwayat" class="page-section glass-panel">
-            <h3 style="color: var(--accent); margin-bottom: 8px;">Riwayat Pembayaran</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 13px;">Daftar pembayaran yang pernah Anda ajukan dan hasil verifikasinya.</p>
+        <div id="page-riwayat" class="page-section panel">
+            <h3 class="section-title">Riwayat Pembayaran</h3>
+            <p class="section-desc">Daftar pembayaran yang pernah Anda ajukan dan hasil verifikasinya.</p>
             
             <div class="table-container">
                 <table>
@@ -149,63 +155,63 @@
                         </tr>
                     </thead>
                     <tbody id="tbody-riwayat">
-                        <tr><td colspan="7" style="text-align:center;">Memuat riwayat pembayaran...</td></tr>
+                        <tr><td colspan="7" class="table-empty">Memuat riwayat pembayaran...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- 5. Halaman Asisten Virtual AI (8 Opsi Sesuai kos.md) -->
-        <div id="page-ai" class="page-section glass-panel">
-            <h3 style="color: var(--accent); margin-bottom: 8px;">🤖 Asisten Virtual AI Kos</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">
+        <div id="page-ai" class="page-section panel">
+            <h3 class="section-title">Asisten Virtual AI Kos</h3>
+            <p class="section-desc">
                 Pilih salah satu dari pertanyaan terstruktur di bawah ini. Layanan AI akan mengambil data terbaru Anda dari sistem dan menyusun jawaban ramah dalam bahasa natural:
             </p>
 
             <div class="ai-container">
                 <!-- 8 Opsi Pertanyaan -->
                 <div class="ai-options">
-                    <button class="ai-opt-btn" onclick="tanyaAI(1)">
+                    <button type="button" class="ai-opt-btn" onclick="tanyaAI(1)">
                         <span>1. Cek tagihan bulan ini dan bulan depan</span>
-                        <span>👉</span>
+                        <i data-icon="chevron"></i>
                     </button>
-                    <button class="ai-opt-btn" onclick="tanyaAI(2)">
+                    <button type="button" class="ai-opt-btn" onclick="tanyaAI(2)">
                         <span>2. Cek tanggal jatuh tempo</span>
-                        <span>👉</span>
+                        <i data-icon="chevron"></i>
                     </button>
-                    <button class="ai-opt-btn" onclick="tanyaAI(3)">
+                    <button type="button" class="ai-opt-btn" onclick="tanyaAI(3)">
                         <span>3. Cek status pembayaran</span>
-                        <span>👉</span>
+                        <i data-icon="chevron"></i>
                     </button>
-                    <button class="ai-opt-btn" onclick="tanyaAI(4)">
+                    <button type="button" class="ai-opt-btn" onclick="tanyaAI(4)">
                         <span>4. Riwayat pembayaran</span>
-                        <span>👉</span>
+                        <i data-icon="chevron"></i>
                     </button>
-                    <button class="ai-opt-btn" onclick="tanyaAI(5)">
+                    <button type="button" class="ai-opt-btn" onclick="tanyaAI(5)">
                         <span>5. Cara upload bukti transfer</span>
-                        <span>👉</span>
+                        <i data-icon="chevron"></i>
                     </button>
-                    <button class="ai-opt-btn" disabled title="Khusus pengelola kos">
-                        <span>6. Rangkuman kas bulanan <small style="color: var(--status-menunggu);">(Khusus Pengelola)</small></span>
-                        <span>🔒</span>
+                    <button type="button" class="ai-opt-btn" disabled title="Khusus pengelola kos">
+                        <span>6. Rangkuman kas bulanan <small>(Khusus Pengelola)</small></span>
+                        <i data-icon="lock"></i>
                     </button>
-                    <button class="ai-opt-btn" disabled title="Khusus pengelola kos">
-                        <span>7. Daftar penghuni yang menunggak <small style="color: var(--status-menunggu);">(Khusus Pengelola)</small></span>
-                        <span>🔒</span>
+                    <button type="button" class="ai-opt-btn" disabled title="Khusus pengelola kos">
+                        <span>7. Daftar penghuni yang menunggak <small>(Khusus Pengelola)</small></span>
+                        <i data-icon="lock"></i>
                     </button>
-                    <button class="ai-opt-btn" onclick="tanyaAI(8)">
+                    <button type="button" class="ai-opt-btn" onclick="tanyaAI(8)">
                         <span>8. Cara menggunakan fitur aplikasi lainnya</span>
-                        <span>👉</span>
+                        <i data-icon="chevron"></i>
                     </button>
                 </div>
 
                 <!-- Chat Box Output AI -->
                 <div class="ai-chat-box">
                     <div class="ai-chat-header">
-                        <span>💬 Jawaban Asisten Virtual:</span>
-                        <span id="ai-loading-indicator" style="display:none; font-size: 12px; color: var(--accent);">Sedang menyusun jawaban...</span>
+                        <span class="ai-title"><i data-icon="bot"></i>Jawaban Asisten</span>
+                        <span id="ai-loading-indicator" class="ai-loading" role="status" style="display:none;">Sedang menyusun jawaban...</span>
                     </div>
-                    <div id="ai-response-box" class="ai-chat-body">
+                    <div id="ai-response-box" class="ai-chat-body" aria-live="polite">
                         Silakan klik salah satu opsi pertanyaan di sebelah kiri untuk melihat jawaban dari asisten AI berdasarkan data kos Anda.
                     </div>
                 </div>
@@ -213,46 +219,33 @@
         </div>
 
         <!-- 6. Halaman Profil Penghuni -->
-        <div id="page-profil" class="page-section glass-panel">
-            <h3 style="color: var(--accent); margin-bottom: 20px;">👤 Profil Penghuni</h3>
-            <div style="max-width: 600px; background: rgba(0,0,0,0.25); border: 1px solid var(--glass-stroke); border-radius: 12px; padding: 24px;">
-                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 14px; font-size: 14px;">
-                    <div style="color: var(--text-secondary);">Nama Lengkap:</div>
-                    <div id="prof-nama" style="font-weight: 600;">-</div>
-
-                    <div style="color: var(--text-secondary);">Email:</div>
-                    <div id="prof-email">-</div>
-
-                    <div style="color: var(--text-secondary);">No. Telepon:</div>
-                    <div id="prof-telepon">-</div>
-
-                    <div style="color: var(--text-secondary);">Nomor Kamar:</div>
-                    <div id="prof-kamar" style="color: var(--accent); font-weight: 600;">-</div>
-
-                    <div style="color: var(--text-secondary);">Tarif Sewa:</div>
-                    <div id="prof-tarif">-</div>
-
-                    <div style="color: var(--text-secondary);">Tanggal Masuk:</div>
-                    <div id="prof-tgl-masuk">-</div>
-
-                    <div style="color: var(--text-secondary);">Status Penghuni:</div>
-                    <div><span id="prof-status" class="badge badge-lunas">Aktif</span></div>
-                </div>
-            </div>
+        <div id="page-profil" class="page-section panel">
+            <h3 class="section-title" style="margin-bottom: 20px;">Profil Penghuni</h3>
+            <dl class="profile-list">
+                <dt>Nama lengkap</dt><dd id="prof-nama">-</dd>
+                <dt>Email</dt><dd id="prof-email">-</dd>
+                <dt>No. telepon</dt><dd id="prof-telepon">-</dd>
+                <dt>Nomor kamar</dt><dd id="prof-kamar" class="cell-strong">-</dd>
+                <dt>Tarif sewa</dt><dd id="prof-tarif">-</dd>
+                <dt>Tanggal masuk</dt><dd id="prof-tgl-masuk">-</dd>
+                <dt>Status penghuni</dt><dd><span id="prof-status" class="badge badge-lunas">Aktif</span></dd>
+            </dl>
         </div>
 
-    </div>
+    </main>
 
     <!-- Modal Pratinjau Gambar Bukti -->
     <div id="modalBukti" class="modal-overlay" onclick="closeModalBukti()">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h4 style="color: var(--accent);">Foto Bukti Transfer</h4>
-                <button class="btn-outline" onclick="closeModalBukti()" style="padding: 4px 10px;">✕ Tutup</button>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalBuktiTitle" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <h4 id="modalBuktiTitle">Foto Bukti Transfer</h4>
+                <button type="button" id="modalBuktiClose" class="btn-outline btn-sm" onclick="closeModalBukti()"><i data-icon="x"></i>Tutup</button>
             </div>
-            <img id="modalBuktiImg" src="" alt="Bukti Transfer" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">
+            <img id="modalBuktiImg" src="" alt="Bukti transfer">
         </div>
     </div>
+
+    <script src="js/ui.js"></script>
 
     <script src="js/dashboard-penghuni.js"></script>
 </body>

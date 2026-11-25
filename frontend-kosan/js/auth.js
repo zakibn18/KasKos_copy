@@ -51,9 +51,9 @@ if (loginForm) {
                 showAlert(result.message || 'Login gagal, periksa email & password.', 'error');
             }
         } catch (error) {
-            showAlert('Gagal terhubung ke server backend di http://localhost:5000.', 'error');
+            showAlert('Gagal terhubung ke server. Periksa koneksi internet lalu coba lagi.', 'error');
         } finally {
-            btn.textContent = 'Masuk Akun';
+            btn.textContent = 'Masuk';
             btn.disabled = false;
         }
     });
